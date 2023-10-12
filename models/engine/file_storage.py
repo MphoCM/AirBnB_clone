@@ -1,4 +1,4 @@
-#!/uar/bin/python3
+#!/usr/bin/python3
 """cls serializes instances to a JSON file and deserializes JSON file"""
 import json
 import os
