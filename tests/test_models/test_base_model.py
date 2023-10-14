@@ -1,123 +1,96 @@
 #!/usr/bin/python3
-# test cases for base class
-import unittest
-from models.base_model import BaseModel
-import models.base_model
-import inspect
-import datetime
-from time import sleep
+
+"""[Unittest for base_model]
+    """
+from datetime import date, datetime
+from unittest import TestCase
+from models import base_model
+import uuid
+import pycodestyle
+BaseModel = base_model.BaseModel
 
 
-class TestBaseModel(unittest.TestCase):
-    """ class to test base class """
+class Test_style(TestCase):
+    """[Class created to test style and syntax requirements for the
+    base_model class]
+    """
 
-    def setUp(self):
-        """This method is called before each test method in the test class.
+    def test_pycode(self):
+        """[Function that check Syntax from Peep8 branch called pycodestyle]
         """
-        self.b = BaseModel()
+        foo = pycodestyle.StyleGuide(quiet=True).check_files([
+            'models/base_model.py'])
+        self.assertEqual(foo.total_errors, 0,
+                         "Found code style error (and warnings).")
 
-    def test_doc(self):
-        """ test_doc(self): to test if module and class has docs """
-        self.assertIsNotNone(BaseModel.__doc__, 'no docs for Base class')
-        self.assertIsNotNone(models.base_model.__doc__, 'no docs for module')
-        for name, method in inspect.getmembers(BaseModel, inspect.isfunction):
-            self.assertIsNotNone(method.__doc__, f"{name} has no docs")
 
-    def test_init(self):
-        """ test instantiation of class """
-        self.assertEqual(type(self.b.id), str)
-        self.assertEqual(type(self.b.updated_at), datetime.datetime)
-        self.assertEqual(type(self.b.created_at), datetime.datetime)
+class Test_base(TestCase):
+    """[Class for testing all the function of base class]
+    """
+    @classmethod
+    def setUpClass(cls):
+        """Setting up a test object"""
+        cls.base_test1 = BaseModel()
+
+    def test_empty_base(self):
+        """[Testing if instance is correcty related]
+        """
+        self.assertIsNotNone(self.base_test1)
+        self.assertIsInstance(self.base_test1, BaseModel)
+
+    def test_id_value(self):
+        """[Cheking if id is an uuid version 4]
+        """
+        base_test2 = BaseModel(id='1')
+        with self.assertRaises(ValueError) as _:
+            uuid.UUID(base_test2.id, version=4)
+        base_test3 = BaseModel(id=['1'])
+        with self.assertRaises(AttributeError) as _:
+            uuid.UUID(base_test3.id, version=4)
+
+    def test_dates(self):
+        """[Cheking dates are correctly created]
+        """
+        self.assertIsInstance(self.base_test1.created_at, datetime)
+        self.assertIsInstance(self.base_test1.updated_at, datetime)
+
+    def test__str__(self):
+        """[Cheking correct output when printing]"""
+        id1 = self.base_test1.id
+        self.assertTrue(f'[BaseModel] ({id1})' in str(self.base_test1))
+
+    def test_creating_with_kwargs(self):
+        """[Checking creation with kwargs]"""
+        obj = BaseModel()
+        dictionary = obj.to_dict()
+        new_date = datetime.today()
+        new_date_iso = new_date.isoformat()
+        dictionary["created_at"] = new_date_iso
+        dictionary["updated_at"] = new_date_iso
+        id = dictionary["id"]
+        obj = BaseModel(**dictionary)
+        self.assertEqual(obj.id, id)
+        self.assertEqual(obj.created_at, new_date)
+        self.assertEqual(obj.updated_at, new_date)
 
     def test_save(self):
-        """ test BaseModel.save() """
-        current_updatedAt = self.b.updated_at
-        self.b.save()
-        self.assertNotEqual(current_updatedAt, self.b.updated_at)
+        """Checks if updated_at is changed with save method"""
+        self.base_test1.save()
+        self.assertNotEqual(self.base_test1.updated_at,
+                            self.base_test1.created_at)
 
-        """ test positional args """
-        with self.assertRaises(TypeError):
-            self.b.save(13)
+    def test_save_with_file(self):
+        """ Checks if the generated key is saved in the json file"""
+        obj = BaseModel()
+        obj.save()
+        key_id = f"BaseModel.{obj.id}"
+        with open("file.json", mode="r", encoding="utf-8") as f:
+            self.assertIn(key_id, f.read())
 
     def test_to_dict(self):
-        """ test BaseModel.to_dict() """
-        self.b.name = "My First Model"
-        self.b.my_number = 89
-        dict1 = self.b.to_dict()
-
-        """ confirming the type of each attr in dict """
-        self.assertEqual(type(dict1['my_number']), int)
-        self.assertEqual(type(dict1['name']), str)
-        self.assertEqual(type(dict1['__class__']), str)
-        self.assertEqual(dict1['__class__'], 'BaseModel')
-        self.assertEqual(type(dict1['updated_at']), str)
-        self.assertEqual(type(dict1['id']), str)
-        self.assertEqual(type(dict1['created_at']), str)
-
-        """ test positional args """
-        with self.assertRaises(TypeError):
-            self.b.to_dict('str')
-
-        """Unittests for task 4
-        """
-
-    def test_model_from_dict(self):
-        """test instantiation from a dictionary
-        """
-        # Example dictionary with attribute values
-        instance_dict = {
-            '__class__': "BaseModel",
-            'id': '123',
-            'created_at': '2023-08-07T15:30:51.120683',
-            'updated_at': '2023-08-07T15:30:51.120690',
-            'name': 'julien',
-            'my_number': 42
-        }
-        test_instance = BaseModel(**instance_dict)
-        self.assertNotIn("__class__", test_instance.__dict__)
-        self.assertEqual(type(test_instance.id), str)
-        self.assertEqual(type(test_instance.created_at), datetime.datetime)
-        self.assertEqual(type(test_instance.updated_at), datetime.datetime)
-        self.assertEqual(type(test_instance.name), str)
-        self.assertEqual(type(test_instance.my_number), int)
-
-    def init_with_invalid_dates(self):
-        """Test initialization with invalid date strings
-        """
-        # Example dictionary with attribute values
-        invalid_dict = {
-            'id': '123',
-            'created_at': '2021-08-07T15:30:51.120690',
-            'updated_at': '2023-08-07T15:30:51.120690',
-            'name': 'julien',
-            'my_number': 42
-        }
-        # Set invalid date string for created_at
-        invalid_dict['created_at'] = "INVALID DATE"
-        with self.assertRaises(ValueError):
-            inst = BaseModel(**invalid_dict)
-
-        # set invalid updated at:
-        invalid_dict['updated_at'] = 2023
-        with self.assertRaises(TypeError):
-            inst = BaseModel(**invalid_dict)
-
-    def test_str(self):
-        """Testing __str__ method"""
-        self.b.id = "1234"
-        strForm = self.b.__str__()
-        expected = "[BaseModel] (1234)"
-        self.assertIn(expected, strForm)
-
-    def test_save_updatedAt(self):
-        """test updating the public instance attribute updated_at
-            with the current datetime"""
-        new_inst = BaseModel()  # create sleep update
-        sleep(0.05)
-        beforeSave_updated_at = new_inst.updated_at
-        new_inst.save()
-        self.assertLess(beforeSave_updated_at, new_inst.updated_at)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        """Checks to_dict method"""
+        base_test4 = BaseModel()
+        dict_base4 = base_test4.to_dict()
+        self.assertIsInstance(dict_base4, dict)
+        self.assertIsInstance(dict_base4['created_at'], str)
+        self.assertIsInstance(dict_base4['updated_at'], str)
