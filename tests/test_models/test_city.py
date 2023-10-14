@@ -1,102 +1,126 @@
 #!/usr/bin/python3
+"""
+test module for testing city models
+"""
 
-"""[Unittest for city]
+import datetime
+import unittest
+from models.base_model import BaseModel
+from models.city import City
+
+
+class TestCityModel(unittest.TestCase):
+    """test class for testing city models
     """
-from datetime import date, datetime
-from unittest import TestCase
-from models import city
-import uuid
-City = city.City
+    def setUp(self):
+        self.temp_b = City()
 
+    def tearDown(self):
+        self.temp_b = None
 
-class Test_style(TestCase):
-    """[Class created to test style and syntax requirements for the
-    city class]
-    """
-
-    def test_pycode(self):
-        """[Function that check Syntax from Peep8 branch called pycodestyle]
+    def test_type(self):
+        """test method for type testing of city  model
         """
-        foo = pycodestyle.StyleGuide(quiet=True).check_files([
-            'models/city.py'])
-        self.assertEqual(foo.total_errors, 0,
-                         "Found code style error (and warnings).")
+        self.assertIsInstance(self.temp_b, City)
+        self.assertEqual(type(self.temp_b), City)
+        self.assertEqual(issubclass(self.temp_b.__class__, BaseModel), True)
+        self.assertEqual(isinstance(self.temp_b, BaseModel), True)
 
-
-class Test_city(TestCase):
-    """[Class for testing all the function of city class]
-    """
-    @classmethod
-    def setUpClass(cls):
-        """Setting up a test object"""
-        cls.city1 = City()
-
-    def test_empty_city(self):
-        """[Testing if instance is correcty related]
+    def test_state_id_type(self):
+        """tests the state_id type of class attribute
         """
-        self.assertIsNotNone(self.city1)
-        self.assertIsInstance(self.city1, City)
+        self.assertEqual(type(City.state_id), str)
 
-    def test_id_value(self):
-        """[Cheking if id is an uuid version 4]
+    def test_name_type(self):
+        """tests the name type of class attribute
         """
-        city_test2 = City(id='1')
-        with self.assertRaises(ValueError) as _:
-            uuid.UUID(city_test2.id, version=4)
-        city_test3 = City(id=['1'])
-        with self.assertRaises(AttributeError) as _:
-            uuid.UUID(city_test3.id, version=4)
+        self.assertEqual(type(City.name), str)
 
-    def test_dates(self):
-        """[Cheking dates are correctly created]
+    def test_basic_attribute_set(self):
+        """test method for basic attribute assignment
         """
-        self.assertIsInstance(self.city1.created_at, datetime)
-        self.assertIsInstance(self.city1.updated_at, datetime)
+        self.temp_b.name = "bennett"
+        self.temp_b.xyz = 400
+        self.assertEqual(self.temp_b.name, "bennett")
+        self.assertEqual(self.temp_b.xyz, 400)
 
-    def test__str__(self):
-        """[Cheking correct output when printing]"""
-        id1 = self.city1.id
-        self.assertTrue(f'[City] ({id1})' in str(self.city1))
-
-    def test_save(self):
-        """Checks if updated_at is changed with save method"""
-        self.city1.save()
-        self.assertNotEqual(self.city1.updated_at,
-                            self.city1.created_at)
+    def test_string_return(self):
+        """tests the string method to make sure it returns
+            the proper string
+        """
+        my_str = str(self.temp_b)
+        id_test = "[{}] ({})".format(self.temp_b.__class__.__name__,
+                                     self.temp_b.id)
+        boolean = id_test in my_str
+        self.assertEqual(True, boolean)
+        boolean = "updated_at" in my_str
+        self.assertEqual(True, boolean)
+        boolean = "created_at" in my_str
+        self.assertEqual(True, boolean)
+        boolean = "datetime.datetime" in my_str
+        self.assertEqual(True, boolean)
 
     def test_to_dict(self):
-        """Checks to_dict method"""
-        city_test4 = City()
-        dict_city4 = city_test4.to_dict()
-        self.assertIsInstance(dict_city4, dict)
-        self.assertIsInstance(dict_city4['created_at'], str)
-        self.assertIsInstance(dict_city4['updated_at'], str)
+        """tests the to_dict method to make sure properly working
+        """
+        my_dict = self.temp_b.to_dict()
+        self.assertEqual(str, type(my_dict['created_at']))
+        self.assertEqual(my_dict['created_at'],
+                         self.temp_b.created_at.isoformat())
+        self.assertEqual(datetime.datetime, type(self.temp_b.created_at))
+        self.assertEqual(my_dict['__class__'],
+                         self.temp_b.__class__.__name__)
+        self.assertEqual(my_dict['id'], self.temp_b.id)
 
-    def test_attributes(self):
-        """Checks correct attributes assignment"""
-        city5 = City(state_id=123)
-        city5.name = "Cali"
-        self.assertEqual(city5.state_id, 123)
-        self.assertEqual(city5.name, 'Cali')
+    def test_to_dict_more(self):
+        """tests more things with to_dict method
+        """
+        my_dict = self.temp_b.to_dict()
+        created_at = my_dict['created_at']
+        time = datetime.datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%S.%f")
+        self.assertEqual(self.temp_b.created_at, time)
 
-    def test_creating_with_kwargs(self):
-        """[Checking creation with kwargs]"""
-        obj = City()
-        dictionary = obj.to_dict()
-        new_date = datetime.today()
-        new_date_iso = new_date.isoformat()
-        dictionary["created_at"] = new_date_iso
-        dictionary["updated_at"] = new_date_iso
-        id = dictionary["id"]
-        obj = City(**dictionary)
-        self.assertEqual(obj.id, id)
-        self.assertEqual(obj.created_at, new_date)
-        self.assertEqual(obj.updated_at, new_date)
+    def test_from_dict_basic(self):
+        """tests the from_dict method
+        """
+        my_dict = self.temp_b.to_dict()
+        my_base = self.temp_b.__class__(**my_dict)
+        self.assertEqual(my_base.id, self.temp_b.id)
+        self.assertEqual(my_base.updated_at, self.temp_b.updated_at)
+        self.assertEqual(my_base.created_at, self.temp_b.created_at)
+        self.assertEqual(my_base.__class__.__name__,
+                         self.temp_b.__class__.__name__)
 
-    def test_save_with_file(self):
-        """ Checks if the generated key is saved in the json file"""
-        obj = City()
-        obj.save()
-        key_id = f"City.{obj.id}"
-        with open("file.json", mode="r", encoding="utf-8") as f:
-            self.assertIn(key_id, f.read())
+    def test_from_dict_hard(self):
+        """test for the from_dict method for class objects
+        """
+        self.temp_b.random = "hello!"
+        self.temp_b.z = 55
+        my_dict = self.temp_b.to_dict()
+        self.assertEqual(my_dict['z'], 55)
+        my_base = self.temp_b.__class__(**my_dict)
+        self.assertEqual(my_base.z, self.temp_b.z)
+        self.assertEqual(my_base.random, self.temp_b.random)
+        self.assertEqual(my_base.created_at, self.temp_b.created_at)
+
+    def test_unique_id(self):
+        """test for unique ids for class objects
+        """
+        another = self.temp_b.__class__()
+        another2 = self.temp_b.__class__()
+        self.assertNotEqual(self.temp_b.id, another.id)
+        self.assertNotEqual(self.temp_b.id, another2.id)
+
+    def test_id_type_string(self):
+        """test id of the class is a string
+        """
+        self.assertEqual(type(self.temp_b.id), str)
+
+    def test_updated_time(self):
+        """test that updated time gets updated
+        """
+        time1 = self.temp_b.updated_at
+        self.temp_b.save()
+        time2 = self.temp_b.updated_at
+        self.assertNotEqual(time1, time2)
+        self.assertEqual(type(time1), datetime.datetime)
