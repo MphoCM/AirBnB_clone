@@ -1,11 +1,20 @@
-#!user/bin/python3
-""" state class """
+#!/usr/bin/python3
+"""state module
+"""
+
+
+import datetime
+import uuid
 from models.base_model import BaseModel
 
 
 class State(BaseModel):
-    """ class State inherts from Model
-        Args:
-            name: string - empty string
-    """"
+    """state model inherits from BaseModel
+    """
+
     name = ""
+
+    def __init__(self, *args, **kwargs):
+        """init method for state class used in instantiation
+        """
+        super().__init__(*args, **kwargs)

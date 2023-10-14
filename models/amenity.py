@@ -1,12 +1,20 @@
 #!/usr/bin/python3
-""" Define Aminity class """
+"""amenity module
+"""
+
+
+import datetime
+import uuid
 from models.base_model import BaseModel
 
 
-class Amenty(BaseModel):
-    """ Creates Amenity class eith attributes
-
-    Attributes:
-            name(str): amenity name
+class Amenity(BaseModel):
+    """amenity model inherits from BaseModel
     """
+
     name = ""
+
+    def __init__(self, *args, **kwargs):
+        """init method for amenity class used in instantiation
+        """
+        super().__init__(*args, **kwargs)
