@@ -1,13 +1,21 @@
-#!user/bin/python3
-""" city class """
+#!/usr/bin/python3
+"""city module
+"""
+
+
+import datetime
+import uuid
 from models.base_model import BaseModel
 
 
 class City(BaseModel):
-    """ class city inherits from BaseModel
-        Args:
-            state_id: string - empty string: it will be the State.id
-            name: string - empty string
+    """city model inherits from BaseModel
     """
+
     state_id = ""
     name = ""
+
+    def __init__(self, *args, **kwargs):
+        """init method for city class used in instantiation
+        """
+        super().__init__(*args, **kwargs)
