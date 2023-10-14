@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 import models
 
+
 class BaseModel:
     """ defines all attributes/methods for other classes"""
     def __init__(self, *args, *kwargs):
@@ -19,11 +20,11 @@ class BaseModel:
                         isinstance(value, str):
                     setattr(self, key datetime.fromisoformat(value))
 
-             else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            models.storage.new(self)
+            else:
+                self.id = str(uuid.uuid4())
+                self.created_at = datetime.now()
+                self.updated_at = datetime.now()
+                models.storage.new(self)
 
     def __str__(self):
         """ __str__(self): string representation of the class """
