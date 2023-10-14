@@ -1,56 +1,60 @@
 #!/usr/bin/python3
-"""[Base model module for HBnB Holberton's project]"""
-import uuid
-from datetime import datetime
+"""This module is the base model for use in all other models
+"""
+
+
+import datetime
 import models
+import uuid
 
 
-class BaseModel:
-    """[BaseModel class for the HBnB Holberton's project]
+class BaseModel():
+    """base model parent class for all other classes
+       used in project
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        """[Constructor that initializes a new instance of BaseModel]
+    def __init__(self, *args, **kwargs):
+        """init method for base class used in instantiation
         """
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.today()
-        self.updated_at = datetime.today()
-        if kwargs:
-            for key, value in kwargs.items():
-                if key == "__class__":
-                    pass
-                elif key != "created_at" and key != "updated_at":
-                    self.__dict__[key] = value
-                else:
-                    self.__dict__[key] = datetime.strptime(
-                        value, "%Y-%m-%dT%H:%M:%S.%f")
+        if len(kwargs) >= 1:
+            self.set_from_dict(**kwargs)
         else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.datetime.now()
+            self.updated_at = datetime.datetime.now()
             models.storage.new(self)
 
-    def __str__(self) -> str:
-        """[Changing the str method expected output to :
-        [<class name>] (<self.id>) <self.__dict__>]
-
-        Returns:
-            str: [description with the information changed]
+    def __str__(self):
+        """custom str method for str and print
         """
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+        builder = "["
+        builder += str(self.__class__.__name__) + '] ('
+        builder += str(self.id) + ') ' + str(self.__dict__)
+        return builder
 
     def save(self):
-        """[Function that updates the update_date]
+        """save method used for updating class so updated_at changes
         """
-        self.updated_at = datetime.today()
+        self.updated_at = datetime.datetime.now()
         models.storage.save()
 
     def to_dict(self):
-        """[Function that returns an specific information about the class
-        in a dict]
-
-        Returns:
-            [dict]: [The atttributes with the format required]
         """
-        copy = self.__dict__.copy()
-        copy["__class__"] = self.__class__.__name__
-        copy["created_at"] = self.created_at.isoformat()
-        copy["updated_at"] = self.updated_at.isoformat()
-        return copy
+        returns the dictionary of our instance
+        """
+        temp_d = self.__dict__.copy()
+        temp_d['__class__'] = self.__class__.__name__
+        temp_d['created_at'] = self.created_at.isoformat()
+        temp_d['updated_at'] = self.updated_at.isoformat()
+        return temp_d
+
+    def set_from_dict(self, **kwargs):
+        """sets attributes from dictionary
+        """
+        for (k, v) in kwargs.items():
+            if k in ('created_at', 'updated_at'):
+                self.__dict__[k] = datetime.datetime\
+                                           .strptime(v,
+                                                     "%Y-%m-%dT%H:%M:%S.%f")
+            else:
+                self.__dict__[k] = v
