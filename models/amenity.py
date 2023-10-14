@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-""" aminity class """
+""" Define Aminity class """
 from models.base_model import BaseModel
 
 
 class Amenty(BaseModel):
-    """ class aminity inherits from BaseModel
-        Args:
-            name: string - empty string
+    """ Creates Amenity class eith attributes
+
+    Attributes:
+            name(str): amenity name
     """
     name = ""
