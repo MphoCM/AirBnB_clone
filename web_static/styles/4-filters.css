@@ -1,0 +1,26 @@
+.filter {
+	bacckground-color: width;
+	height: 70px;
+	width: 100%;
+	border: 1px solid #DDDDDD;
+	border-radius: 4px;
+}
+
+button {
+	color:#FFFFFF;
+	font-size:18px;
+
+	height: 48px;
+	width: 20%;
+	background-clor: #FF5A5F;
+	border-style: 4px;
+
+	float: right;
+	margin-top: 11px;
+	margin-bottom: 11px;
+	margin-right: 30px;
+}
+
+butto:hover {
+	opaccity:90%;
+}
